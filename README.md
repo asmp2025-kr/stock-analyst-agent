@@ -163,6 +163,9 @@ __pycache__/
 ### Cover Banner
 ![Stock Analyst Agent Cover Banner](assets/cover_page_banner.png)
 
+### Live Demo Video
+![Stock Analyst Agent Live Demo Video](assets/stock_analyst_demo.webp)
+
 ---
 
 ## Demo Script
