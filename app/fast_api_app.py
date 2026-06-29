@@ -34,6 +34,8 @@ from app.app_utils.telemetry import (
     setup_telemetry,
 )
 from app.app_utils.typing import Feedback
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 import logging
 # Configure standard python logging
@@ -124,6 +126,20 @@ app.description = "API for interacting with the Agent stock-analyst-agent"
 # Proxy routes so the Vertex AI Console Playground (reasoning_engine SDK) can
 # talk to this agent alongside the native adk_api routes.
 attach_reasoning_engine_routes(app)
+
+
+# Serve custom frontend dashboard at /dashboard
+@app.get("/dashboard", response_class=HTMLResponse)
+def read_dashboard():
+    return FileResponse(os.path.join(AGENT_DIR, "frontend", "index.html"))
+
+
+# Mount frontend directory for static assets
+app.mount(
+    "/frontend",
+    StaticFiles(directory=os.path.join(AGENT_DIR, "frontend")),
+    name="frontend",
+)
 
 
 @app.post("/feedback")
