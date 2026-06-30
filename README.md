@@ -19,13 +19,11 @@ git clone https://github.com/<your-username>/stock-analyst-agent.git
 cd stock-analyst-agent
 cp .env.example .env          # add your GOOGLE_API_KEY
 make install
-make playground               # opens UI at http://localhost:18081
+make run                      # starts server and premium dashboard
 ```
 
-> **Windows users:** Use this instead of `make playground`:
-> ```powershell
-> uv run adk web app --host 127.0.0.1 --port 18081 --reload_agents
-> ```
+* **Premium Web Dashboard:** Access the custom glassmorphic UI at **[http://localhost:8000/dashboard](http://localhost:8000/dashboard)**.
+* **Developer UI Playground:** Alternatively, run `make playground` to launch ADK's built-in developer UI at **[http://localhost:18081](http://localhost:18081)**.
 
 ---
 
@@ -80,8 +78,8 @@ User Query
 | Command | What it does |
 |---------|-------------|
 | `make install` | Install Python dependencies |
-| `make playground` | Interactive UI at http://localhost:18081 |
-| `make run` | Local web server (port 8000) |
+| `make run` | Starts API server and hosts the premium Dashboard at http://localhost:8000/dashboard |
+| `make playground` | Launches ADK's built-in developer playground UI at http://localhost:18081 |
 | `make test` | Run unit + integration tests |
 
 ---
@@ -93,7 +91,8 @@ User Query
 Input:    "Tell me about GOOG"
 Expected: Security check passes → Orchestrator runs both analysts →
           Report says HOLD (no BUY/SELL keyword) → Finalize report directly
-Check:    You should see a markdown summary with GOOG technical + fundamental data
+Check:    You should see a markdown summary with GOOG technical + fundamental data 
+          rendered in the Chat Feed, and the right-hand panel populated with Google metrics.
 ```
 
 ### Test 2 — BUY/SELL Trade with Human Approval
@@ -101,7 +100,8 @@ Check:    You should see a markdown summary with GOOG technical + fundamental da
 Input:    "Should I buy or sell TSLA?"
 Expected: Security check passes → Analysts run → Orchestrator recommends BUY or SELL →
           Agent PAUSES and asks: "Do you approve this trade? (Yes/No)"
-Check:    A human-in-the-loop prompt appears in the playground UI asking for approval
+Check:    An interactive "Approve" / "Deny" prompt panel appears in the UI. 
+          Clicking "Approve" resumes the workflow to output "Trade execution APPROVED".
 ```
 
 ### Test 3 — Security Block (Prompt Injection)

@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import json
 import logging
 from typing import Any
@@ -24,9 +25,11 @@ from app.config import config
 mcp_toolset = MCPToolset(
     connection_params=StdioConnectionParams(
         server_params=StdioServerParameters(
-            command="uv",
-            args=["run", "-m", "app.mcp_server"],
-        )
+            command=sys.executable,
+            args=["-u", "-m", "app.mcp_server"],
+            env=os.environ.copy(),
+        ),
+        timeout=20.0,
     )
 )
 

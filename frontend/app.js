@@ -157,8 +157,11 @@ function appendMessage(text, sender) {
     const icon = sender === "user" ? "fa-user" : "fa-robot";
     const title = sender === "user" ? "You" : "Stock Analyst Agent";
     
-    // Parse minimal markdown bold / codes
+    // Parse markdown headers, bold, and code formatting
     let formattedText = escapeHtml(text)
+        .replace(/### (.*?)(?:\n|<br>|$)/g, "<h3>$1</h3>")
+        .replace(/## (.*?)(?:\n|<br>|$)/g, "<h2>$1</h2>")
+        .replace(/# (.*?)(?:\n|<br>|$)/g, "<h1>$1</h1>")
         .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
         .replace(/`(.*?)`/g, "<code>$1</code>")
         .replace(/\n/g, "<br>");
@@ -226,6 +229,14 @@ async function streamQuery(payload) {
                         const parsed = JSON.parse(dataStr);
                         handleAgentEvent(parsed);
 
+                        // Capture non-streamed python node outputs
+                        if (parsed.output && typeof parsed.output === "string") {
+                            const author = parsed.author || "";
+                            if (author === "finalize_report" || author === "security_event" || author === "hitl_approval") {
+                                appendMessage(parsed.output, "assistant");
+                            }
+                        }
+
                         // Capture actual assistant message text updates
                         if (parsed.content && parsed.content.parts) {
                             for (const part of parsed.content.parts) {
@@ -238,6 +249,9 @@ async function streamQuery(payload) {
                                     // Live update bubble content
                                     const p = assistantMessageDiv.querySelector(".message-content p");
                                     let formatted = escapeHtml(assistantMessageContent)
+                                        .replace(/### (.*?)(?:\n|<br>|$)/g, "<h3>$1</h3>")
+                                        .replace(/## (.*?)(?:\n|<br>|$)/g, "<h2>$1</h2>")
+                                        .replace(/# (.*?)(?:\n|<br>|$)/g, "<h1>$1</h1>")
                                         .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
                                         .replace(/`(.*?)`/g, "<code>$1</code>")
                                         .replace(/\n/g, "<br>");
