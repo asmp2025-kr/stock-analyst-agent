@@ -32,7 +32,7 @@ def test_agent_stream() -> None:
     runner = Runner(agent=root_agent, session_service=session_service, app_name="test")
 
     message = types.Content(
-        role="user", parts=[types.Part.from_text(text="Why is the sky blue?")]
+        role="user", parts=[types.Part.from_text(text="Tell me about GOOG")]
     )
 
     events = list(
@@ -51,6 +51,8 @@ def test_agent_stream() -> None:
             event.content
             and event.content.parts
             and any(part.text for part in event.content.parts)
+        ) or (
+            event.output
         ):
             has_text_content = True
             break

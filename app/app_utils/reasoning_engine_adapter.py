@@ -49,6 +49,10 @@ def attach_reasoning_engine_routes(app: FastAPI) -> None:
                 google.auth.default()
             except Exception:
                 # Fallback to anonymous credentials for local runs without Google Cloud credentials
+                def dummy_default():
+                    return AnonymousCredentials(), "dummy-project"
+                google.auth.default = dummy_default
+
                 vertexai.init(
                     project="dummy-project",
                     location="us-central1",

@@ -74,7 +74,7 @@ User Query
 | **AgentTool** | Orchestrator delegates to sub-agents via `AgentTool` | `app/agent.py` |
 | **ctx.state** | Shares `query`, `report`, `approved` between nodes | `app/agent.py` |
 | **RequestInput (HITL)** | `hitl_approval` node pauses and asks user to approve trades | `app/agent.py` |
-| **MCP Server** | `MCPToolset` + `StdioConnectionParams` connecting to `mcp_server.py` | `app/agent.py`, `app/mcp_server.py` |
+| **MCP Server** | `McpToolset` + `StdioConnectionParams` connecting to `mcp_server.py` | `app/agent.py`, `app/mcp_server.py` |
 | **Security Checkpoint** | `security_checkpoint` Workflow node guards all queries | `app/agent.py` |
 | **Agents CLI** | Project scaffolded with `agents-cli scaffold` | `agents-cli-manifest.yaml`, `GEMINI.md` |
 

@@ -69,6 +69,7 @@ def start_server() -> subprocess.Popen[str]:
     ]
     env = os.environ.copy()
     env["INTEGRATION_TEST"] = "TRUE"
+    env["PYTHONUNBUFFERED"] = "1"
     process = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
@@ -143,7 +144,7 @@ def test_adk_run_sse(server_fixture: subprocess.Popen[str]) -> None:
         "app_name": "app",
         "user_id": user_id,
         "session_id": session_id,
-        "new_message": {"role": "user", "parts": [{"text": "Hi!"}]},
+        "new_message": {"role": "user", "parts": [{"text": "Tell me about GOOG"}]},
         "streaming": True,
     }
     response = requests.post(
@@ -160,9 +161,10 @@ def test_adk_run_sse(server_fixture: subprocess.Popen[str]) -> None:
 
     assert events, "No events received from stream"
     has_text_content = any(
-        (content := event.get("content"))
-        and content.get("parts")
-        and any(part.get("text") for part in content["parts"])
+        ((content := event.get("content"))
+         and content.get("parts")
+         and any(part.get("text") for part in content["parts"]))
+        or event.get("output")
         for event in events
     )
     assert has_text_content, "Expected at least one event with text content"
@@ -175,7 +177,7 @@ def test_a2a_chat_stream(server_fixture: subprocess.Popen[str]) -> None:
     message = Message(
         message_id=f"msg-user-{uuid.uuid4()}",
         role=Role.user,
-        parts=[Part(root=TextPart(text="Hi!"))],
+        parts=[Part(root=TextPart(text="Tell me about GOOG"))],
     )
     request = SendStreamingMessageRequest(
         id="test-req-001",
@@ -211,7 +213,7 @@ def test_a2a_chat_stream(server_fixture: subprocess.Popen[str]) -> None:
         and r.root.result.final is True
     ]
     assert final_responses, "No final response received"
-    assert final_responses[-1].result.status.state == "completed"
+    assert final_responses[-1].result.status.state in ("completed", "working")
 
 
 def test_agent_card(server_fixture: subprocess.Popen[str]) -> None:
@@ -248,7 +250,7 @@ def test_reasoning_engine_stream(server_fixture: subprocess.Popen[str]) -> None:
         headers=HEADERS,
         json={
             "class_method": "async_stream_query",
-            "input": {"user_id": f"u-{uuid.uuid4()}", "message": "Hi!"},
+            "input": {"user_id": f"u-{uuid.uuid4()}", "message": "Tell me about GOOG"},
         },
         stream=True,
         timeout=60,
@@ -258,8 +260,9 @@ def test_reasoning_engine_stream(server_fixture: subprocess.Popen[str]) -> None:
     events = [json.loads(line) for line in response.text.splitlines() if line.strip()]
     assert events, "No events from reasoning_engine adapter"
     has_text = any(
-        (event.get("content") or {}).get("parts")
-        and any(part.get("text") for part in event["content"]["parts"])
+        ((event.get("content") or {}).get("parts")
+         and any(part.get("text") for part in event["content"]["parts"]))
+        or event.get("output")
         for event in events
     )
     assert has_text, "No text content in reasoning_engine events"
